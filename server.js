@@ -32,7 +32,6 @@ io.on('connection', (socket)=>{
             { user : msg.user, rooms : rooms[i][0].users.length, updatedContent : rooms[i][0].users });
         }
     })
-
     socket.on("updateText", (msg)=>{
         let i = roomNames.indexOf(msg.roomName),
         user = rooms[i][0].users.map( v => v.user ).indexOf(msg.user)
