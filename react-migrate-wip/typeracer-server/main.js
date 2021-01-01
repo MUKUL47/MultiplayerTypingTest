@@ -4,10 +4,13 @@ let typeRacer = [];
 io.on('connection', onConnection.bind(this))
 http.listen(process.env.PORT || 3001)
 function onConnection(socket){
-    console.log(socket.id);
-    socket.on('disconnect', () => {
-      
+    console.log('connected ',socket.id);
+
+    socket.on('RESET', data => {
+        typeRacer = [];
+        io.emit('RESET_DONE')
     })
+
     socket.on('CREATE_ROOM', data => {
         const roomName = data.roomName;
         const user = data.user;
@@ -30,7 +33,7 @@ function onConnection(socket){
                 }]
             }
         )
-        io.to(socket.id).emit('CREATED_ROOM', { id : data.id, room : roomName })
+        io.to(socket.id).emit('CREATED_ROOM', { id : data.id, room : roomName, message : 'A new room created!' })
     })
 
     socket.on('ENTER_ROOM', data => {
@@ -38,11 +41,12 @@ function onConnection(socket){
         const user = data.user;
         const room = typeRacer.find(racer => racer.roomName === roomName);
         if(!room){
-            io.emit('ENTER_ROOM_ERROR', { error : 'Room not found', id : data.id , room : roomName})
+            console.log('eroere',socket.id)
+            io.to(socket.id).emit('ENTER_ROOM_ERROR', { error : 'Room not found'})
             return;
         }
         else if(room.participants.find(participant => participant.name === user)){
-            io.emit('ENTER_ROOM_ERROR', { error : 'Name already exist', id : data.id , room : roomName})
+            io.to(socket.id).emit('ENTER_ROOM_ERROR', { error : 'Name already exist' })
             return;
         }
         room.participants.push(
@@ -50,70 +54,40 @@ function onConnection(socket){
                 name : user, 
                 isReady : false,
                 progress : 0,
-                position : room.participants.length
+                position : room.participants.length,
+                socketId : socket.id
             }
         )
-        io.emit('ENTERED_ROOM', { message : 'A new user joined', roomName : room.roomName, room : room })
+        room.participants.forEach(participant => io.to(participant.socketId).emit('ENTERED_ROOM', { message : `${user} has joined the room!`, room : room }))
     })
-
-    socket.on('READY_PLAYER', data => {
-        const roomName = data.roomName;
-        const user = data.user;
-        const room = typeRacer.find(racer => racer.roomName === roomName);
-        if(!room){
-            io.emit('READY_PLAYER_ERROR', { error : 'Room not found', id : data.id , room : roomName})
-            return;
-        }
-        const currentUser = room.participants.find(p => p.name === user);
-        if(currentUser){
-            currentUser.isReady = true;
-            io.emit('PLAYER_READY', { roomName : room.roomName, room : room })
-            return
-        }
-    });
-
-    socket.on('RESET', data => {
-        typeRacer = [];
-        io.emit('RESET_DONE')
-    })
-    socket.on('LOGOUT', data => {
-        const roomName = data.roomName;
-        const user = data.user;
-        const roomIdx = typeRacer.findIndex(racer => racer.roomName === roomName);
-        const room = room[roomIdx]
-        if(!room){
-            io.emit('LOGOUT_ERROR', { error : 'Room not found', id : data.id })
-            return;
-        }
-        if(user === room.owner){
-            if(room.participants.length === 1){
-                delete room[roomIdx];
-                io.emit('LOGOUT_DONE', { id : data.id, room : room })
+// assa
+    socket.on('disconnect', onDisconnect.bind(this))
+    socket.on('LEAVE_ROOM', onDisconnect.bind(this))
+    function onDisconnect(){
+        console.log('disconnect ',socket.id);
+        let typeIdx, participantIdx;
+        typeRacer.forEach((racer, i) => {
+            const pIdx = racer.participants.findIndex(p => p.socketId === socket.id);
+            if(pIdx > -1){
+                typeIdx = i;
+                participantIdx = pIdx
                 return;
             }
-            room.owner = room.participants[1].name; //ownership moved to next guy
-            room.participants.splice(0,1);
-            io.emit('LOGOUT_DONE', { id : data.id, room : room })
-            return;
+        })
+        if(typeIdx > -1 && participantIdx > -1){
+            if(typeRacer[typeIdx].participants.length === 1){
+                typeRacer.splice(typeIdx, 1)
+                return;
+            }
+            const whoLeft = `${typeRacer[typeIdx].participants[participantIdx].name}`
+            typeRacer[typeIdx].participants.splice(participantIdx, 1);
+            typeRacer[typeIdx].owner = typeRacer[typeIdx].participants[0].name;
+            typeRacer[typeIdx].participants.forEach(participant => {
+                console.log('participant.socketId-',participant.socketId, typeRacer[typeIdx].participants.length)
+                io.to(participant.socketId).emit('ENTERED_ROOM', { message : `${whoLeft} left the room!`, room : typeRacer[typeIdx] })
+            })
         }
-        const currentUserIdx = room.participants.findIndex(p => p.name === user);
-        if(currentUserIdx > -1){
-            room.participants.splice(currentUserIdx, 1);
-        }
-        io.emit('LOGOUT_DONE', { id : data.id, room : room })
-
-    });
-
-    // socket.on('UPDATE_PROGRESS', data => {
-    //     const roomName = data.roomName;
-    //     const user = data.user;
-    //     const room = typeRacer.find(racer => racer.roomName === roomName);
-    //     if(!room){
-    //         io.emit('UPDATE_PROGRESS_ERROR', { error : 'Room not found', id : data.id })
-    //         return;
-    //     }
-    // });
-
+    }
 }
 /**
  * {
