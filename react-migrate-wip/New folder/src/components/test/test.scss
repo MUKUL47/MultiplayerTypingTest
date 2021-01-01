@@ -1,0 +1,217 @@
+.test{
+    min-height: calc(100vh - 20px);
+    background-color: #2a2f5d;
+    padding: 10px 20px;
+
+    .test-nav{
+        background-color: #FFF;
+        display: flex;
+        padding: 0 10px;
+        align-items: center;
+        height: 3rem;
+        border-radius: 2px;
+        justify-content: space-between;
+        border-bottom: 1px solid #e2e2e2;
+
+        div:nth-child(odd) {
+            cursor: pointer;
+        }
+
+        .room-name{
+            font-size: 1.3rem;
+        }
+    }
+    // 
+    .progress{
+
+        .participant-nav{
+            display : flex;
+            justify-content: space-between;
+
+            .action{
+                button{
+                    padding: 4px 10px;
+                    background: #104b00;
+                    color: #fff;
+                    font-weight: bold;
+                    border: none;
+                    cursor: pointer;
+                    transition: .25s  color;
+                    border-radius: 2.5px;
+                    &:focus{
+                        outline: transparent;
+                    }
+                    &:hover{
+                        transition: .25s color;
+                        background: #fff;
+                        color: #000;
+                        border: 1px solid rgba(0, 0, 0, 0.514);
+                    }
+                }
+            }
+        }
+
+        // width: 90%;
+        margin: auto;
+        padding: 10px;
+        margin-top: 30px;
+        background-color: #FFF;
+        border-radius: 2px;
+
+        .progress-users{
+            max-height: calc(100vh - 340px);
+            overflow: auto;
+            padding: 5px 0px;
+        }
+
+        .p-user{
+            display: flex;
+            align-items: center;
+            height: 30px;
+            padding: 5px 0;
+            // justify-content: space-around;
+
+            &:not(:last-child){
+                border-bottom: 1px solid #77777754;
+            }
+
+            .p-name{
+                max-width: 80px;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                white-space: nowrap;
+                font-weight: bold;
+                font-size: 1.2rem;
+                font-family: Merriweather;
+            }
+
+            .p-name-me{
+                color: #2803cc;
+                font-weight: bold;
+            }
+
+            div:not(:last-child){
+                margin-right: 5px;
+            }
+            .p-status{
+                display: flex;
+                width: 70vw;
+                height: 10px;
+                border-radius: 10px;
+                background: #c1c1c5;
+            }
+            .progress-data{
+                border-radius: 10px;
+                transition: .5s;
+                background: #4b4b64;
+            }
+            .p-progress{
+                font-family: emoji;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                color: #888;
+            }
+        }
+    }
+
+    //@at-root
+    .socket-message{
+        padding: 10px 0;
+        text-align: center;
+        color: #FFF;
+        font-family: sans-serif;
+        display: flex;
+
+        .admin-options{
+            flex: 30%;
+            text-align: left;
+
+            button{
+                border: none;
+                background-color: #6dffd4;
+                padding: 5px 10px;
+                border-radius: 1.5px;
+                font-size: 1rem;
+                cursor: pointer;
+                font-weight: bold;
+                transition: .5s background-color;
+
+                &:focus{
+                    outline: none;
+                }
+                &:hover{
+                    transition: .5s background-color;
+                    background-color: #e0e5ff;
+                }
+            }
+        }
+
+        .global-messages{
+            flex: 70%;
+            text-align: left;
+        }
+    }
+
+    // 
+    .typing-playground{
+        // width: 90%;
+        padding: 10px;
+        margin: auto;
+        border: 1px solid #6670871a;
+        border-radius: 2px;
+        background-color: rgb(255, 255, 255);
+
+
+        .paragraph{
+            padding: 1rem 0;
+            h3{
+                font-family: 'Roboto';
+                display: inline;
+                user-select: none;
+            }
+            #active{
+                // text-decoration: wavy;
+                font-weight: bold;
+                background-color: #000;
+                padding: 0 2px;
+                color: #FFF;
+                border-radius: 4px;
+                padding: 0 2px;
+            }
+        }
+
+        .typing-area{
+            display: flex;
+            position: relative;
+
+            svg{
+                position: absolute;
+                right: 10px;
+                top: 10px;
+                font-size: 12px;
+            }
+
+            input{
+                width: 100%;
+                padding : 5px;
+                border: none;
+                font-size: 1.2rem;
+                border-bottom: 1px solid #bbb;
+
+                &:focus{
+                    outline: none;
+                }
+            }
+        }
+    }
+}
+.icon{
+    padding-right: 10px;
+}
+span{
+    font-size: .9rem;
+    padding: 3px;
+    display: inline-block;
+    font-family: Oswald;
+}
