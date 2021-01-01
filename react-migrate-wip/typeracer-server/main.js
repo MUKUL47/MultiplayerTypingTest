@@ -24,6 +24,8 @@ function onConnection(socket){
                 owner : user,
                 maxParticipants : data.maxParticipants || -1,
                 paragraph : data.paragraph,
+                started : false,
+                done : false,
                 participants : [{
                     name : user,
                     isReady  : false,
@@ -88,6 +90,25 @@ function onConnection(socket){
             })
         }
     }
+
+    socket.on('READY_TOGGLE', () => {
+        const { typeIdx, participantIdx } = findTypeAndParticipant('socketId', socket.id);
+        if(typeIdx > -1 && participantIdx > -1){
+            const participants = typeRacer[typeIdx].participants;
+            participants[participantIdx].isReady = !participants[participantIdx].isReady;
+            participants.forEach(participant => io.to(participant.socketId).emit('READY_TOGGLED', { room : typeRacer[typeIdx] }))
+        }
+    })
+}
+
+function findTypeAndParticipant(type, value){
+    for(let i = 0; i < typeRacer.length; i++){
+        const pIdx = typeRacer[i].participants.findIndex(p => p[type] === value);
+        if(pIdx > -1){
+            return { typeIdx : i, participantIdx : pIdx }
+        }
+    }
+    return { typeIdx : -1, participantIdx : -1 }
 }
 /**
  * {
