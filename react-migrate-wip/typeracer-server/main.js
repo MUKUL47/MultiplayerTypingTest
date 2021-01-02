@@ -2,13 +2,9 @@ const http = require('http').createServer(require('express')());
 const io = require('socket.io')(http);
 let typeRacer = [];
 io.on('connection', onConnection.bind(this))
-io.use((socket, next) => {
-    console.log('middleware ',socket)
-})
 http.listen(process.env.PORT || 3001)
 function onConnection(socket){
     console.log('connected ',socket.id);
-
     socket.on('RESET', data => {
         typeRacer = [];
         io.emit('RESET_DONE')
@@ -28,7 +24,6 @@ function onConnection(socket){
                 maxParticipants : data.maxParticipants || -1,
                 paragraph : data.paragraph,
                 started : false,
-                done : false,
                 locked : false,
                 participants : [{
                     name : user,
@@ -56,6 +51,10 @@ function onConnection(socket){
         }
         else if(room.locked){
             io.to(socket.id).emit('ENTER_ROOM_ERROR', { error : 'Room is locked' })
+            return;
+        }
+        else if(room.started){
+            io.to(socket.id).emit('ENTER_ROOM_ERROR', { error : 'Type race is already running, come back later' })
             return;
         }
         room.participants.push(
@@ -116,7 +115,15 @@ function onConnection(socket){
     })
 
     socket.on('START_RACE', () => {
-        const { typeIdx } = findTypeAndParticipant('socketId', socket.id);
+        const { typeIdx, participantIdx } = findTypeAndParticipant('socketId', socket.id);
+        if(typeIdx > -1 && participantIdx > -1){
+            if(typeRacer[typeIdx].owner === typeRacer[typeIdx].participants[participantIdx].name){
+                typeRacer[typeIdx].started = true;
+                typeRacer[typeIdx].participants.forEach(participant => io.to(participant.socketId).emit('RACE_STARTED'))
+            }else{
+                io.to(socket.id).emit('START_RACE_ERROR', { error : 'Only owner can start the race' })
+            }
+        }
     })
 }
 
@@ -129,21 +136,3 @@ function findTypeAndParticipant(type, value){
     }
     return { typeIdx : -1, participantIdx : -1 }
 }
-/**
- * {
-    roomName : string,
-    owner : string,
-    maxParticipants : number,
-    paragraph : string,
-    
-    participants : [
-        {
-            name : string,
-            isReady : boolean,
-            progress : number,
-            position : number
-        }
-    ]
-}
-
- */
