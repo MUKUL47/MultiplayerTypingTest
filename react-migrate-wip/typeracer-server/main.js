@@ -2,6 +2,9 @@ const http = require('http').createServer(require('express')());
 const io = require('socket.io')(http);
 let typeRacer = [];
 io.on('connection', onConnection.bind(this))
+io.use((socket, next) => {
+    console.log('middleware ',socket)
+})
 http.listen(process.env.PORT || 3001)
 function onConnection(socket){
     console.log('connected ',socket.id);
@@ -26,6 +29,7 @@ function onConnection(socket){
                 paragraph : data.paragraph,
                 started : false,
                 done : false,
+                locked : false,
                 participants : [{
                     name : user,
                     isReady  : false,
@@ -35,7 +39,7 @@ function onConnection(socket){
                 }]
             }
         )
-        io.to(socket.id).emit('CREATED_ROOM', { id : data.id, room : roomName, message : 'A new room created!' })
+        io.to(socket.id).emit('CREATED_ROOM', { id : data.id, room : typeRacer[typeRacer.length - 1], message : 'A new room created!' })
     })
 
     socket.on('ENTER_ROOM', data => {
@@ -43,12 +47,15 @@ function onConnection(socket){
         const user = data.user;
         const room = typeRacer.find(racer => racer.roomName === roomName);
         if(!room){
-            console.log('eroere',socket.id)
             io.to(socket.id).emit('ENTER_ROOM_ERROR', { error : 'Room not found'})
             return;
         }
         else if(room.participants.find(participant => participant.name === user)){
             io.to(socket.id).emit('ENTER_ROOM_ERROR', { error : 'Name already exist' })
+            return;
+        }
+        else if(room.locked){
+            io.to(socket.id).emit('ENTER_ROOM_ERROR', { error : 'Room is locked' })
             return;
         }
         room.participants.push(
@@ -98,6 +105,18 @@ function onConnection(socket){
             participants[participantIdx].isReady = !participants[participantIdx].isReady;
             participants.forEach(participant => io.to(participant.socketId).emit('READY_TOGGLED', { room : typeRacer[typeIdx] }))
         }
+    })
+
+    socket.on('ROOM_LOCK_TOGGLE', () => {
+        const { typeIdx } = findTypeAndParticipant('socketId', socket.id);
+        if(typeIdx > -1){
+            typeRacer[typeIdx].locked = !typeRacer[typeIdx].locked;
+            typeRacer[typeIdx].participants.forEach(participant => io.to(participant.socketId).emit('ROOM_LOCK_TOGGLED', { room : typeRacer[typeIdx] }))
+        }
+    })
+
+    socket.on('START_RACE', () => {
+        const { typeIdx } = findTypeAndParticipant('socketId', socket.id);
     })
 }
 
