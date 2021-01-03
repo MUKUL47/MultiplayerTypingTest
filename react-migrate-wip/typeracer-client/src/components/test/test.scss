@@ -139,7 +139,8 @@
             }
     
             .p-user{
-                display: flex;
+                display: grid;
+                grid-template-columns: 26px 50px 1fr;
                 align-items: center;
                 height: 30px;
                 padding: 5px 0;
@@ -149,16 +150,17 @@
                 }
     
                 .p-name{
-                    min-width: 30px;
                     text-overflow: ellipsis;
                     overflow: hidden;
                     white-space: nowrap;
                     font-weight: bold;
                     font-size: 1rem;
+                    max-width: 100px;
                 }
     
                 .p-name-me{
                     color: #2803cc;
+                    max-width: 100px;
                     // font-weight: bold;
                 }
     
@@ -166,10 +168,10 @@
                     margin-right: 5px;
                 }
                 .race-started{
-                    width: 100%;
                     display: flex;
                     align-items: center;
                     margin-left: 5px;
+                    flex-grow: 10;
 
                     .p-status{
                         display: flex;
@@ -177,18 +179,31 @@
                         height: 10px;
                         border-radius: 10px;
                         background: #c1c1c5;
+                        flex: 1;
                     }
                     .progress-data{
                         border-radius: 10px;
                         transition: .5s;
-                        background-color: #0000005e;
+                        background-color: #000000ce;
+                    }
+
+                    .p-data{
+                        display: flex;
+                        font-weight: bold;
+                        font-size: 14px;
+                        
+                        .percent{
+                            padding-right: 5px;
+                        }
+                        .position{
+                            opacity: .75;
+                        }
                     }
                 }
                 
                 .p-progress{
                     font-family: emoji;
                     display: flex;
-                    justify-content: center;
                     align-items: center;
                     color: #888;
                 }
@@ -209,18 +224,20 @@
     
             .paragraph{
                 padding: 1rem 0;
+                h3:nth-child(1){
+                    background-color: #88888838;
+                    padding: 0px 6px;
+                }
                 h3{
                     font-family: 'Roboto';
                     display: inline;
                     user-select: none;
                 }
                 #active{
-                    // text-decoration: wavy;
                     font-weight: bold;
                     background-color: #000;
                     padding: 0 2px;
                     color: #FFF;
-                    border-radius: 4px;
                     padding: 0 2px;
                 }
             }

@@ -99,6 +99,16 @@ class TypeRacer{
         room.started = true
         return { room : room }
     }
+
+    updateTypeProgress(socketId, progress){
+        const room = this.getRoomFromSocket(socketId)
+        if(!room) return 'Room not found'
+        const participant = room.participants.find(p => p.socketId === socketId)
+        if(!participant) return 'Participant not found'
+        participant.progress = Number(progress)
+        room.participants.sort((f1, f2) => f1.progress != f2.progress ? ( f1.progress > f2.progress  ? -1 : 1) : 0)
+        return { room : room }
+    }
 }
 
 exports.TypeRacer = TypeRacer

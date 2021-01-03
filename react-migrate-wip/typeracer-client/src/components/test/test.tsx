@@ -6,13 +6,10 @@ import { useHistory } from 'react-router-dom';
 function Test() {
     const history = useHistory();
     const socketContext = (useContext(SocketContext) as any);
-    const [testData, setTestData] = useReducer(setGlobalToggleFunc, { viewReady : false })
+    const [testData, setTestData] = useReducer(setGlobalToggleFunc, { viewReady : false, timer : -1, started : false })
     useEffect(() => {
         let unsub : any;
         if(socketContext.room){
-            setTimeout(()=>{
-                console.log(socketContext.room)
-            },1000)
             setTestData({ viewReady : true });
             unsub = eventEmitter.subscribe(response => {
                 if(['READY_TOGGLED', 'ROOM_RESPONSE', 'ENTERED_ROOM'].includes(response.event)){
@@ -23,8 +20,12 @@ function Test() {
                     });
                     if(response.params.message) toastToggle.next(response.params.message)
                 }
-                else if(['ROOM_LOCK_TOGGLED', 'RACE_STARTED'].includes(response.event)){
+                else if(['ROOM_LOCK_TOGGLED', 'RACE_STARTED', 'UPDATED_TYPE_PROGRESS'].includes(response.event)){
                     socketContext.set({ room : response.params.room });
+                    console.log(response.params.room )
+                    if(response.event === 'RACE_STARTED'){
+                        setTestData({ timer : 5 })
+                    }
                 }
                 else if(FAILED_SOCKET_EVENTS.includes(response.event)){
                     toastToggle.next(response.params.error)
@@ -36,8 +37,10 @@ function Test() {
         return () => unsub?.unsubscribe();
     },[]);
     useEffect(() => {
-        console.log(socketContext.room)
-    },[socketContext.room])
+        if(testData.timer > 0){
+            setTimeout(() => setTestData({ timer : testData.timer - 1, started : testData.timer - 1 === 0 ? true : false }), 1000)
+        }
+    },[testData.timer])
     const onExit = () : void => {
         history.push('/')
         socketContext.set({room : null})        
@@ -52,6 +55,9 @@ function Test() {
     const onStartRace = () : void => {
         socketContext.sendEvent('START_RACE')
     }
+    const updateProgress = (percentage : number | string) : void => {
+        socketContext.sendEvent('UPDATE_TYPE_PROGRESS', { percent : percentage })
+    }
     return (
         testData.viewReady ? 
             <TestRender 
@@ -60,6 +66,8 @@ function Test() {
                 onReadyToggle={onReadyToggle}
                 onRoomLockToggle={onRoomLockToggle}
                 onStartRace={onStartRace}
+                updateProgress = {updateProgress}
+                {...testData}
             />
         : null
     );

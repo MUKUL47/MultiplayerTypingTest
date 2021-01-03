@@ -38,7 +38,6 @@ function Home() {
     }
     return (
         <>
-        <button onClick={() => {socketContext.sendEvent('RESET')}}>RESET</button>
         <HomeRender onCreate={onCreate} onEnter={onEnter}/>
         </>
     );

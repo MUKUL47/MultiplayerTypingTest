@@ -70,4 +70,14 @@ function onConnection(socket){
         }
         io.to(resp.room.roomName).emit('START_RACE_ERROR', resp)
     })
+
+    socket.on('UPDATE_TYPE_PROGRESS', (data) => {
+        const resp = typeRacer.updateTypeProgress(socket.id, data.percent);
+        if(typeof resp === 'object'){
+            socket.to(resp.room.roomName).emit('UPDATED_TYPE_PROGRESS', resp)
+            io.to(socket.id).emit('UPDATED_TYPE_PROGRESS', resp)
+            return
+        }
+        // io.to(resp.room.roomName).emit('START_RACE_ERROR', resp)
+    })
 }

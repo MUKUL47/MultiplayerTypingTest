@@ -20,7 +20,7 @@
 
         .create-head>h1, .enter-head>h1{
             font-size: 1.95rem;
-            border-bottom: 2px solid #ffffff54;
+            border-bottom: 1px solid #ffffff42;
             font-family: -webkit-pictograph;
             svg{
                 font-size: 1.2rem;
@@ -34,7 +34,8 @@
             margin-bottom: 1.5rem;
 
             h3{
-                font-family: monospace;
+                font-size: 13.2px;
+                font-family: 'Roboto';
             }
         }
         
@@ -64,10 +65,12 @@
             cursor: pointer;
             transition: .25s ease-in background-color;
 
-            &:hover{
+            &:focus{
                 outline: none;
+            }
+            &:hover{
                 transition: .25s ease-in;
-                background-color: #000;
+                background-color: #5579b6;
             }
         }
     }
