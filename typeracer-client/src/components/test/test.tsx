@@ -10,6 +10,7 @@ function Test() {
     useEffect(() => {
         let unsub : any;
         if(socketContext.room){
+            document.title = `Type Racer | ${socketContext.room.roomName}`
             setTestData({ viewReady : true });
             unsub = eventEmitter.subscribe(response => {
                 if(['READY_TOGGLED', 'ROOM_RESPONSE', 'ENTERED_ROOM'].includes(response.event)){
