@@ -1,6 +1,6 @@
-export default class TypeRacer{
+class TypeRacer{
     constructor(){
-        this.typeRacer = {};
+        this.typeRacer = {}
     }
     //getters
     getRoom(roomName){
@@ -9,10 +9,9 @@ export default class TypeRacer{
 
     //setters
     createRoom(roomName, owner, maxParticipant, parargraph, socketId){
-        if(this.typeRacer[roomName]){
-            return 'Room exist';
-        }
+        if(this.typeRacer[roomName]) return 'Room exist'
         this.typeRacer[roomName] = {
+            roomName : roomName,
             owner : owner,
             maxParticipant : maxParticipant,
             parargraph : parargraph,
@@ -26,27 +25,20 @@ export default class TypeRacer{
                 socketId : socketId
             }]
         }
-        return true;
+        return true
     }
 
     deleteRoom(roomName){
         delete this.typeRacer[roomName]
-        return true;
+        return true
     }
 
     enterRoom(roomName, participant, socketId){
-        if(!this.typeRacer[roomName]){
-            return 'Room not found';
-        }
-        else if(this.typeRacer[roomName].participants.find(p => p.name === participant)){
-            return 'Name already exist';
-        }
-        else if(this.typeRacer[roomName].locked){
-            return 'Room is locked';
-        }
-        else if(this.typeRacer[roomName].started){
-            return 'Type race is already running, come back later';
-        }
+        if(!this.typeRacer[roomName]) return 'Room not found'
+        else if(this.typeRacer[roomName].participants.find(p => p.name === participant)) return 'Name already exist'
+        else if(this.typeRacer[roomName].started) return 'Type race is already running, come back later'
+        else if(this.typeRacer[roomName].locked) return 'Room is locked'
+        else if(this.typeRacer[roomName].maxParticipant == this.typeRacer[roomName].participants.length) return 'Room is full'
         this.typeRacer[roomName].participants.push({
             name : participant,
             isReady : false,
@@ -54,42 +46,59 @@ export default class TypeRacer{
             position : this.typeRacer[roomName].participants.length,
             socketId : socketId
         })
-        return true;
+        return true
     }
 
-    exitRoom(roomName, participantId){
-        if(!this.typeRacer[roomName]){
-            return 'Room not found';
-        }
-        const pIdx = this.typeRacer[roomName].participants.findIndex(p => p.socketId === participantId);
+    exitRoom(socketId){
+        const room = this.getRoomFromSocket(socketId)
+        if(!room) return true
+        const pIdx = room.participants.findIndex(p => p.socketId === socketId)
         if(pIdx > -1){
-            if(this.typeRacer[roomName].participants.length === 1){
-                this.deleteRoom(roomName)
-                return;
+            if(room.participants.length === 1){
+                this.deleteRoom(room.roomName)
+                return true
             }
-            const whoLeft = `${this.typeRacer[roomName].participants[participantId].name}`
-            this.typeRacer[roomName].participants.splice(participantId, 1);
-            this.typeRacer[roomName].owner = this.typeRacer[roomName].participants[0].name;
-            return `${whoLeft} left the room!`;
+            const whoLeft = `${room.participants[pIdx].name}`
+            room.participants.splice(pIdx, 1)
+            room.owner = room.participants[0].name
+            return { message : `${whoLeft} left the room!`, room : room }
         }
     }
 
-    getRoomOfParticipant(roomName, type, value){
-        
+    getRoomFromSocket(socketId){
+        for(let room in this.typeRacer){
+            if(this.typeRacer[room].participants.find(p => p.socketId === socketId)){
+                return this.typeRacer[room]
+            }
+        }
+        return null
     }
 
-    toggleRoomLock(roomName){
-        if(!this.typeRacer[roomName]){
-            return 'Room not found';
-        }
-        this.typeRacer[roomName].locked = !this.typeRacer[roomName].locked
+    toggleRoomLock(socketId){
+        const room = this.getRoomFromSocket(socketId)
+        if(!room) return 'Room not found'
+        room.locked = !room.locked
+        return { room : room }
+    }
+    
+    toggleRaceReady(socketId){
+        const room = this.getRoomFromSocket(socketId)
+        if(!room) return 'Room not found'
+        const participant = room.participants.find(p => p.socketId === socketId)
+        if(!participant) return 'Participant not found'
+        participant.isReady = !participant.isReady
+        return { room : room }
     }
 
-    startRace(roomName){
-        if(!this.typeRacer[roomName]){
-            return 'Room not found';
-        }
-        this.typeRacer[roomName].started = true
+    startRace(socketId){
+        const room = this.getRoomFromSocket(socketId)
+        if(!room) return 'Room not found'
+        const participant = room.participants.find(p => p.socketId === socketId)
+        if(!participant) return 'Participant not found'
+        if(participant.name !== room.owner) return 'Only admin can start the race'
+        room.started = true
+        return { room : room }
     }
 }
 
+exports.TypeRacer = TypeRacer

@@ -10,6 +10,9 @@ function Test() {
     useEffect(() => {
         let unsub : any;
         if(socketContext.room){
+            setTimeout(()=>{
+                console.log(socketContext.room)
+            },1000)
             setTestData({ viewReady : true });
             unsub = eventEmitter.subscribe(response => {
                 if(['READY_TOGGLED', 'ROOM_RESPONSE', 'ENTERED_ROOM'].includes(response.event)){
@@ -20,8 +23,8 @@ function Test() {
                     });
                     if(response.params.message) toastToggle.next(response.params.message)
                 }
-                else if('ROOM_LOCK_TOGGLED' === response.event){
-                    socketContext.set({ room : {...socketContext.room, locked : response.params.room.locked} });
+                else if(['ROOM_LOCK_TOGGLED', 'RACE_STARTED'].includes(response.event)){
+                    socketContext.set({ room : response.params.room });
                 }
                 else if(FAILED_SOCKET_EVENTS.includes(response.event)){
                     toastToggle.next(response.params.error)
@@ -32,6 +35,9 @@ function Test() {
         }
         return () => unsub?.unsubscribe();
     },[]);
+    useEffect(() => {
+        console.log(socketContext.room)
+    },[socketContext.room])
     const onExit = () : void => {
         history.push('/')
         socketContext.set({room : null})        
@@ -43,6 +49,9 @@ function Test() {
     const onReadyToggle = () : void => {
         socketContext.sendEvent('READY_TOGGLE')
     }
+    const onStartRace = () : void => {
+        socketContext.sendEvent('START_RACE')
+    }
     return (
         testData.viewReady ? 
             <TestRender 
@@ -50,6 +59,7 @@ function Test() {
                 onExit={onExit} 
                 onReadyToggle={onReadyToggle}
                 onRoomLockToggle={onRoomLockToggle}
+                onStartRace={onStartRace}
             />
         : null
     );

@@ -1,10 +1,11 @@
 import React, { useEffect, useReducer } from 'react';
-import { setGlobalToggleFunc } from '../../utils/utils';
+import { DEFAULT_PARAGRAPH, setGlobalToggleFunc, toastToggle } from '../../utils/utils';
 function HomeRender(props : { onCreate : Function, onEnter : Function }) {
     const { onCreate, onEnter } = props;
     const [createRoomForm, setCreateRoomForm] = useReducer(setGlobalToggleFunc, { roomName : '', name : '', maxParticipants : 5, customParagraph : '' })
     const [enterRoomForm, setEnterRoomForm] = useReducer(setGlobalToggleFunc, { roomName : '', name : '' });
     const [validator, setValidator] = useReducer(setGlobalToggleFunc, { createRoomValid : false, enterRoomValid : false });
+    const uniqueError : string  = 'Invalid room or user name';
     useEffect(() => {
         setValidator(
             {
@@ -22,6 +23,29 @@ function HomeRender(props : { onCreate : Function, onEnter : Function }) {
         const f : any = {};
         f[type] = value;
         setEnterRoomForm(f);
+    }
+    
+    const onSubmit = (isCreate ?: boolean) : void => {
+        if(isCreate){
+            const trimCP = createRoomForm.customParagraph.trim().length > 0;
+            if(!validator.createRoomValid){
+                toastToggle.next(uniqueError);
+            }
+            else if(createRoomForm.maxParticipants < 2){
+                toastToggle.next('Max participants cannot be less than 2');
+            }
+            else if(trimCP && createRoomForm.customParagraph.split(' ').length < 10){
+                toastToggle.next('Custom paragraph should have atleast 10 words');
+            }else{
+                onCreate({...createRoomForm, customParagraph : trimCP ? createRoomForm.customParagraph.trim() : DEFAULT_PARAGRAPH })
+            }
+        }else{
+            if(!validator.enterRoomValid){
+                toastToggle.next(uniqueError);
+                return
+            }
+            onEnter(enterRoomForm)
+        }
     }
     return (
         <div className="home-div">
@@ -47,7 +71,7 @@ function HomeRender(props : { onCreate : Function, onEnter : Function }) {
                     </textarea>
             </div>
                 <div className="s-btn">
-                    <button className="submit-room" disabled = {!validator.createRoomValid} onClick={() => onCreate(createRoomForm)}>
+                    <button className="submit-room"  onClick={() => onSubmit(true)}>
                         Create
                     </button>
                 </div>
@@ -65,7 +89,7 @@ function HomeRender(props : { onCreate : Function, onEnter : Function }) {
                     <input type="text" placeholder="John Doe" value={enterRoomForm.name} onChange={e => onEnterRoomChange('name', e.target.value)}/>
                 </div>
                 <div className="e-btn">
-                        <button className="enter-room" disabled = {!validator.enterRoomValid} onClick={() => onEnter(enterRoomForm)}>
+                        <button className="enter-room"   onClick={() => onSubmit()}>
                             Enter
                         </button>
                     </div>

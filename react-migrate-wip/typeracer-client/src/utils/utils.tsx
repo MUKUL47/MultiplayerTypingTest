@@ -20,8 +20,12 @@ export const SOCKET_EVENTS = [
 // 
 'READY_TOGGLE',
 'READY_TOGGLED',
-'ROOM_LOCK_TOGGLED']
+'ROOM_LOCK_TOGGLED',
+'RACE_STARTED']
 export const FAILED_SOCKET_EVENTS = [
     'CREATE_ROOM_ERROR',
-    'ENTER_ROOM_ERROR'
+    'ENTER_ROOM_ERROR',
+    'START_RACE_ERROR'
 ]
+
+export const DEFAULT_PARAGRAPH = 'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Aperiam quisquam quidem omnis labore perspiciatis est obcaecati, temporibus doloribus ab minima autem odit sed et aut facilis recusandae itaque culpa quae.'

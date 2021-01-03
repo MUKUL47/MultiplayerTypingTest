@@ -3,7 +3,7 @@ import { setGlobalToggleFunc } from '../../utils/utils';
 import './test.scss'
 const para = 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Perferendis quae doloremque porro in ab neque architecto tenetur repudiandae quidem assumenda minima commodi eius praesentium, laborum, quisquam sed nisi mollitia. Velit'.split(' ');
 function TestRender(props : any) {
-    const { isOwner, room, name, onExit, onReadyToggle, userData, onRoomLockToggle } = props;
+    const { isOwner, room, name, onExit, onReadyToggle, userData, onRoomLockToggle, onStartRace } = props;
     const [roomData, setRoomData] = useReducer(setGlobalToggleFunc, { roomLocked : true })
     //
     const [paragraph, setParagraph] = useState<number>(0)
@@ -58,14 +58,20 @@ function TestRender(props : any) {
             </div>
             <div className="socket-message">
                     {
-                        isOwner && usersReady? 
-                        <div className="admin-options">
-                            <button className="start-race"> {adminBtnMessage} </button>
-                        </div>: null
+                        participants > 1 ?
+                        <>
+                        {
+                            isOwner && usersReady? 
+                            <div className="admin-options">
+                                <button className="start-race" onClick={onStartRace}> {adminBtnMessage} </button>
+                            </div>: null
+                        }
+                        <div className={isOwner ? 'global-messages' : 'global-messages g-m-t'}>
+                            {globalMessage}
+                        </div>
+                    </>
+                        :null
                     }
-                    <div className={isOwner ? 'global-messages' : 'global-messages g-m-t'}>
-                        {globalMessage}
-                    </div>
                 </div>
             <div className="room-activity">
                 <div className="progress">
@@ -83,19 +89,19 @@ function TestRender(props : any) {
                             room['participants'].map((participant : any, i :number) => {
                                 return <div className="p-user" key={i}>
                                         <div className="room-admin">
-                                            { room.owner === participant.name ? <i className="fas fa-cog"></i> : null }
+                                            { room.owner === participant.name ? <i className="fas fa-user-cog"></i>: <i className="fas fa-user icon"></i> }
                                         </div>
                                         <div className={ participant.name === name ? 'p-name p-name-me' : 'p-name' }>{participant.name === name ? 'You' : participant.name}</div>
                                         
                                         {
                                             room.started?
-                                            <>
+                                            <div className="race-started">
                                                 <div className="p-status">
                                                     <div className="progress-data" style={{ width : `${participant.progress}%` }}></div>
                                                 </div>
                                                 <p className="p-data">{participant.progress}%</p>
-                                            </> :
-                                            <div className="p-progress"> {participant.isReady ? ' - Ready' : ' - Not Ready'} </div>
+                                            </div> :
+                                            <div className="p-progress"> {participant.isReady ? ' Ready' : ' Not Ready'} </div>
                                         }
                                     </div>
                             })
@@ -103,14 +109,23 @@ function TestRender(props : any) {
                     </div>
                 </div>
                 <div className="typing-playground">
-                    <i className="fas fa-keyboard icon"></i>
-                    <span><p>Paragraph</p></span>
+                    <div className="paragraph-detail">
+                        <i className="fas fa-keyboard icon"></i>
+                        <span><p>Paragraph</p></span>
+                    </div>
                     <div className="paragraph" id='para'>
-                        {/* <h3 id='active'></h3>
-                        <h3> </h3> */}
+                        {/* <h3 id='active'>Numquam</h3> */}
+                        {/* <h3> Lorem ipsum dolor sit amet consectetur, adipisicing elit. Eum nihil quod ullam? Excepturi at soluta, voluptate corrupti quis illum facere. Ex, aperiam. Numquam suscipit quod corporis nostrum ea! Illo, quaerat. </h3> */}
+                        <h3>{room.parargraph}</h3>
                     </div>
                     <div className="typing-area">
-                        <input type="text" value={value} placeholder={target} onChange={onParaChange}/>
+                        <input type="text" 
+                            value={value} 
+                            placeholder={target} 
+                            onChange={onParaChange} 
+                            disabled={!room.started}
+                            style={{opacity : !room.started ? '0.25' : '1'}}
+                        />
                         <i className="fas fa-pen"></i>
                     </div>
                 </div>

@@ -9,7 +9,7 @@
         padding: 0 10px;
         align-items: center;
         height: 3rem;
-        border-radius: 2px;
+        border-radius: 3.5px;
         justify-content: space-between;
         border-bottom: 1px solid #e2e2e2;
 
@@ -80,6 +80,7 @@
             align-items: center;
             display: flex;
             font-size: 14px;
+            font-family: 'Noto Sans JP';
 
             .g-msg-info{
                 font-size: 12px;
@@ -93,8 +94,18 @@
         grid-template-columns: 1fr 1fr;
         grid-column-gap: 20px;
         margin-top: 5px;
+        align-items: baseline;
 
         .progress{
+
+            min-height: 70px;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            background-color: #FFF;
+            border-radius: 3.5px;
+            max-height: calc(100vh - 165px);
+
 
             .participant-nav{
                 display : flex;
@@ -121,13 +132,6 @@
                 }
             }
     
-            // width: 90%;
-            // margin: auto;
-            padding: 10px;
-            // margin-top: 30px;
-            background-color: #FFF;
-            border-radius: 2px;
-    
             .progress-users{
                 max-height: calc(100vh - 340px);
                 overflow: auto;
@@ -139,42 +143,48 @@
                 align-items: center;
                 height: 30px;
                 padding: 5px 0;
-                // justify-content: space-around;
     
                 &:not(:last-child){
-                    border-bottom: 1px solid #77777754;
+                    border-bottom: 1px solid #7777771a;
                 }
     
                 .p-name{
-                    max-width: 80px;
+                    min-width: 30px;
                     text-overflow: ellipsis;
                     overflow: hidden;
                     white-space: nowrap;
                     font-weight: bold;
-                    font-size: 1.2rem;
-                    font-family: Merriweather;
+                    font-size: 1rem;
                 }
     
                 .p-name-me{
                     color: #2803cc;
-                    font-weight: bold;
+                    // font-weight: bold;
                 }
     
                 div:not(:last-child){
                     margin-right: 5px;
                 }
-                .p-status{
+                .race-started{
+                    width: 100%;
                     display: flex;
-                    width: 70vw;
-                    height: 10px;
-                    border-radius: 10px;
-                    background: #c1c1c5;
+                    align-items: center;
+                    margin-left: 5px;
+
+                    .p-status{
+                        display: flex;
+                        width: 100%;
+                        height: 10px;
+                        border-radius: 10px;
+                        background: #c1c1c5;
+                    }
+                    .progress-data{
+                        border-radius: 10px;
+                        transition: .5s;
+                        background-color: #0000005e;
+                    }
                 }
-                .progress-data{
-                    border-radius: 10px;
-                    transition: .5s;
-                    background: #4b4b64;
-                }
+                
                 .p-progress{
                     font-family: emoji;
                     display: flex;
@@ -189,12 +199,12 @@
     
         // 
         .typing-playground{
-            // width: 90%;
             padding: 10px;
-            // margin: auto;
             border: 1px solid #6670871a;
-            border-radius: 2px;
+            border-radius: 3.5px;
             background-color: rgb(255, 255, 255);
+            overflow: auto;
+            max-height: calc(100vh - 165px);
     
     
             .paragraph{
@@ -254,6 +264,8 @@ span{
 //mobile
 @media only screen and (max-width: 550px) {
     .test{
+        padding: 15px;
+        min-height: calc(100vh - 30px);
         .room-activity{
             display: block;
             .typing-playground{
